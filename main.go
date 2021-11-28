@@ -116,11 +116,16 @@ func _main() {
 }
 
 func main() {
-	http.HandleFunc("/", HelloServer)
-	fmt.Println("http://localhost:2112/")
+	http.HandleFunc("/metrics", FakeServer)
+	fmt.Println("http://localhost:2112/metrics")
 	log.Fatal(http.ListenAndServe(":2112", nil))
 }
 
-func HelloServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello world!")
+func FakeServer(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, `# HELP gmail_threads_inbox_total total number of threads with the label INBOX
+# TYPE gmail_threads_inbox_total gauge
+gmail_threads_inbox_total 944
+# HELP gmail_threads_inbox_unread number of unread threads with the label INBOX
+# TYPE gmail_threads_inbox_unread gauge
+gmail_threads_inbox_unread 866`)
 }

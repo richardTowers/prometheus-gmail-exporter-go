@@ -79,7 +79,7 @@ func recordMetrics(interval int, gaugeConfigByLabelId map[string][]GaugeConfig, 
 	}()
 }
 
-func main() {
+func _main() {
 	configFile, err := ioutil.ReadFile("config.yml")
 	if err != nil {
 		log.Fatalf("could not read config file: %v", err)
@@ -113,4 +113,14 @@ func main() {
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	fmt.Println("http://localhost:2112/metrics")
 	log.Fatal(http.ListenAndServe(":2112", nil))
+}
+
+func main() {
+	http.HandleFunc("/", HelloServer)
+	fmt.Println("http://localhost:2112/")
+	log.Fatal(http.ListenAndServe(":2112", nil))
+}
+
+func HelloServer(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello world!")
 }

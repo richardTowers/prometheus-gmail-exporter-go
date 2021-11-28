@@ -112,5 +112,5 @@ func main() {
 
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	fmt.Println("http://localhost:2112/metrics")
-	log.Fatal(http.ListenAndServe("127.0.0.1:2112", nil))
+	log.Fatal(http.ListenAndServe(":2112", nil))
 }

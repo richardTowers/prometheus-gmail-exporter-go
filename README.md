@@ -16,4 +16,19 @@ to set this up. Store your client credentials in `credentials.json`.
 The exporter will use your client credentials to get an access token which lets
 it talk to the Gmail API. It will store the token in `token.json`.
 
+Running
+-------
+
+### Running locally
+
+```shell
+go run *.go
+```
+
+### Using docker
+
+```shell
+docker build -t prometheus-gmail-exporter-go .
+docker run -it -p 2112:2112 -v $(pwd):/app prometheus-gmail-exporter-go
+```
 

@@ -24,7 +24,6 @@ func recordMetrics(interval int, unreadGauge *prometheus.GaugeVec, totalGauge *p
 		for {
 			fmt.Printf("scraping %d labels\n", len(labelIdsByName))
 			for labelName, labelId := range labelIdsByName {
-				fmt.Printf("scraping id %s name %s\n", labelId, labelName)
 				label, err := srv.Users.Labels.Get("me", labelId).Do()
 				if err != nil {
 					fmt.Printf("%v", err)

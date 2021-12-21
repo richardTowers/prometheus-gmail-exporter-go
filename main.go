@@ -19,16 +19,16 @@ type Config struct {
 	Labels   []string `yaml:"labels"`
 }
 
-func recordMetrics(interval int, unreadGauge *prometheus.GaugeVec, totalGauge *prometheus.GaugeVec, labelIdsByName map[string]string, srv *gmail.Service) {
+func recordMetrics(interval int, unreadGauge *prometheus.GaugeVec, totalGauge *prometheus.GaugeVec, labelIds []string, srv *gmail.Service) {
 	go func() {
 		for {
-			fmt.Printf("scraping %d labels\n", len(labelIdsByName))
-			for labelName, labelId := range labelIdsByName {
+			fmt.Printf("scraping %d labels\n", len(labelIds))
+			for _, labelId := range labelIds {
 				label, err := srv.Users.Labels.Get("me", labelId).Do()
 				if err != nil {
 					fmt.Printf("%v", err)
 				} else {
-					prometheusLabels := map[string]string{"Label": "gmail_" + strcase.ToSnake(labelName)}
+					prometheusLabels := map[string]string{"Label": "gmail_" + strcase.ToSnake(label.Name)}
 					totalGauge.With(prometheusLabels).Set(float64(label.ThreadsTotal))
 					unreadGauge.With(prometheusLabels).Set(float64(label.ThreadsUnread))
 				}
@@ -52,11 +52,11 @@ func main() {
 
 	srv := createGmailService()
 
-	labelIdsByName := make(map[string]string)
+	var labelIds []string
 	for _, lab := range getLabels(srv) {
 		for _, desiredLabel := range config.Labels {
 			if lab.Name == desiredLabel {
-				labelIdsByName[lab.Name] = lab.Id
+				labelIds = append(labelIds, lab.Id)
 				break
 			}
 		}
@@ -79,7 +79,7 @@ func main() {
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(unreadGauge, totalGauge)
 
-	recordMetrics(config.Interval, unreadGauge, totalGauge, labelIdsByName, srv)
+	recordMetrics(config.Interval, unreadGauge, totalGauge, labelIds, srv)
 
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	fmt.Println("http://localhost:2112/metrics")

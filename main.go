@@ -59,6 +59,7 @@ func createGauges(config Config, labelIdsByName map[string]string) map[string][]
 func recordMetrics(interval int, gaugeConfigByLabelId map[string][]GaugeConfig, srv *gmail.Service) {
 	go func() {
 		for {
+			fmt.Printf("scraping %d labels\n", len(gaugeConfigByLabelId))
 			for labelId, gaugeConfigs := range gaugeConfigByLabelId {
 				label, err := srv.Users.Labels.Get("me", labelId).Do()
 				if err != nil {
@@ -79,7 +80,7 @@ func recordMetrics(interval int, gaugeConfigByLabelId map[string][]GaugeConfig, 
 	}()
 }
 
-func _main() {
+func main() {
 	configFile, err := ioutil.ReadFile("config.yml")
 	if err != nil {
 		log.Fatalf("could not read config file: %v", err)
@@ -113,19 +114,4 @@ func _main() {
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	fmt.Println("http://localhost:2112/metrics")
 	log.Fatal(http.ListenAndServe(":2112", nil))
-}
-
-func main() {
-	http.HandleFunc("/metrics", FakeServer)
-	fmt.Println("http://localhost:2112/metrics")
-	log.Fatal(http.ListenAndServe(":2112", nil))
-}
-
-func FakeServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, `# HELP gmail_threads_inbox_total total number of threads with the label INBOX
-# TYPE gmail_threads_inbox_total gauge
-gmail_threads_inbox_total 944
-# HELP gmail_threads_inbox_unread number of unread threads with the label INBOX
-# TYPE gmail_threads_inbox_unread gauge
-gmail_threads_inbox_unread 866`)
 }
